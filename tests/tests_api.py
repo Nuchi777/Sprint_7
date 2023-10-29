@@ -36,7 +36,6 @@ class TestCreateCourier:
         assert response.status_code == 200
 
     def test_cannot_create_two_identical_couriers(self):
-
         # создаем курьера
         data = register_new_courier_and_return_login_password()
         login = data[0]
@@ -70,7 +69,6 @@ class TestCreateCourier:
 
     @pytest.mark.parametrize("login, password", [["", "12345"], ["e.koloskov", ""]])
     def test_create_couriers_fill_not_all_required_field(self, login, password):
-
         # создаем курьера без логина или пароля
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
@@ -80,9 +78,12 @@ class TestCreateCourier:
         response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
         assert response.status_code == 400 and response.text == '{"message": "Недостаточно данных для создания учетной записи"}'
 
-
-
-
+    @pytest.mark.parametrize("data_create", [{"password": "12345"}, {"login": "e.koloskov"}])
+    def test_create_couriers_required_field_login_or_password_not_sending(self, data_create):
+        # создаем курьера. Не передаем логин или пароль
+        endpoint_create_courier = '/api/v1/courier'
+        response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
+        assert response.status_code == 400 and response.text == '{"message": "Недостаточно данных для создания учетной записи"}'
 
 
 class TestLoginCourier:
