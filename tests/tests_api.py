@@ -85,6 +85,37 @@ class TestCreateCourier:
         response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
         assert response.status_code == 400 and response.text == '{"message": "Недостаточно данных для создания учетной записи"}'
 
+    def test_create_couriers_with_login_in_database(self):
+        # создаем курьера
+        data = register_new_courier_and_return_login_password()
+        login = data[0]
+        password = data[1]
+        firstName = data[2]
+
+        # логинимся под созданным курьером
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": login,
+            "password": password
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        id_courier = response.json()['id']
+        assert response.status_code == 200
+
+        # создаем курьера с тем же логином
+        endpoint_create_courier = '/api/v1/courier'
+        data_create = {
+            "login": login,
+            "password": "12345",
+            "firstName": firstName
+        }
+        response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
+        assert response.status_code == 409 and response.text == '{"message": "Этот логин уже используется"}'
+
+        # удаляем созданного курьера
+        endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
+        response = requests.delete(f'{url}{endpoint_delete_courier}')
+        assert response.status_code == 200
 
 class TestLoginCourier:
     pass
