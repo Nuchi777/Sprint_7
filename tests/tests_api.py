@@ -10,6 +10,7 @@ url = 'http://qa-scooter.praktikum-services.ru'
 
 class TestCreateCourier:
     def test_can_create_courier(self):
+        # курьера можно создать
         # создаем курьера
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
@@ -35,22 +36,14 @@ class TestCreateCourier:
         response = requests.delete(f'{url}{endpoint_delete_courier}')
         assert response.status_code == 200
 
-    def test_cannot_create_two_identical_couriers(self):
+
+    def test_cannot_create_two_identical_couriers(self, courier):
+        # нельзя создать двух одинаковых курьеров
         # создаем курьера
-        data = register_new_courier_and_return_login_password()
+        data = courier
         login = data[0]
         password = data[1]
         firstName = data[2]
-
-        # логинимся под созданным курьером
-        endpoint_login_courier = '/api/v1/courier/login'
-        data_login = {
-            "login": login,
-            "password": password
-        }
-        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
-        id_courier = response.json()['id']
-        assert response.status_code == 200
 
         # создаем курьера с теми же параметрами
         endpoint_create_courier = '/api/v1/courier'
@@ -62,13 +55,10 @@ class TestCreateCourier:
         response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
         assert response.status_code == 409 and response.text == '{"message": "Этот логин уже используется"}'
 
-        # удаляем созданного курьера
-        endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
-        response = requests.delete(f'{url}{endpoint_delete_courier}')
-        assert response.status_code == 200
 
     @pytest.mark.parametrize("login, password", [["", "12345"], ["e.koloskov", ""]])
     def test_create_couriers_fill_not_all_required_field(self, login, password):
+        # чтобы создать курьера, нужно передать в ручку все обязательные поля
         # создаем курьера без логина или пароля
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
@@ -80,17 +70,33 @@ class TestCreateCourier:
 
     @pytest.mark.parametrize("data_create", [{"password": "12345"}, {"login": "e.koloskov"}])
     def test_create_couriers_required_field_login_or_password_not_sending(self, data_create):
+        # если одного из полей нет, запрос возвращает ошибку
         # создаем курьера. Не передаем логин или пароль
         endpoint_create_courier = '/api/v1/courier'
         response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
         assert response.status_code == 400 and response.text == '{"message": "Недостаточно данных для создания учетной записи"}'
 
-    def test_create_couriers_with_login_in_database(self):
+    def test_create_couriers_with_login_in_database(self, courier):
+        # если создать пользователя с логином, который уже есть, возвращается ошибка.
+        data = courier
+        login = data[0]
+
+        # создаем курьера с тем же логином
+        endpoint_create_courier = '/api/v1/courier'
+        data_create = {
+            "login": login,
+            "password": 12345
+        }
+        response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
+        assert response.status_code == 409 and response.text == '{"message": "Этот логин уже используется"}'
+
+
+class TestLoginCourier:
+    def test_login_couriers(self):
         # создаем курьера
         data = register_new_courier_and_return_login_password()
         login = data[0]
         password = data[1]
-        firstName = data[2]
 
         # логинимся под созданным курьером
         endpoint_login_courier = '/api/v1/courier/login'
@@ -100,25 +106,39 @@ class TestCreateCourier:
         }
         response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
         id_courier = response.json()['id']
-        assert response.status_code == 200
-
-        # создаем курьера с тем же логином
-        endpoint_create_courier = '/api/v1/courier'
-        data_create = {
-            "login": login,
-            "password": "12345",
-            "firstName": firstName
-        }
-        response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
-        assert response.status_code == 409 and response.text == '{"message": "Этот логин уже используется"}'
+        assert response.status_code == 200 and response.text == f'{{"id":{id_courier}}}'
 
         # удаляем созданного курьера
         endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
         response = requests.delete(f'{url}{endpoint_delete_courier}')
         assert response.status_code == 200
 
-class TestLoginCourier:
-    pass
+    def test_login_couriers_required_field_login_not_sending(self):
+        # создаем курьера
+        data = register_new_courier_and_return_login_password()
+        password = data[1]
+
+        # логинимся под созданным курьером без логина
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "password": password
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
+
+        # логинимся под созданным курьером для удаления
+        endpoint_login_courier = '/api/v1/courier/login'
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_create)
+        id_courier = response.json()['id']
+        assert response.status_code == 200
+
+        # удаляем созданного курьера
+        endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
+        response = requests.delete(f'{url}{endpoint_delete_courier}')
+        assert response.status_code == 200
+
+
+
 
 
 class TestCreateOrder:
