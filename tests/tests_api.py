@@ -109,7 +109,6 @@ class TestLoginCourier:
         response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
         id_courier = response.json()['id']
         assert response.status_code == 200 and response.text == f'{{"id":{id_courier}}}'
-        print(data)
 
 
     def test_login_couriers_required_field_login_empty(self, courier):
@@ -202,9 +201,10 @@ class TestLoginCourier:
 
     def test_login_couriers_non_existent_user(self, courier):
         # если авторизоваться под несуществующим пользователем, запрос возвращает ошибку
+        # создаем курьера
         data = courier
         login = data[0]
-        password = data[0]
+        password = data[1]
         # логинимся под несуществующим курьером
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
@@ -214,7 +214,22 @@ class TestLoginCourier:
         response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
-
+    def test_correct_login_couriers_return_id(self, courier):
+        # успешный запрос возвращает id
+        # создаем курьера
+        data = courier
+        login = data[0]
+        password = data[1]
+        # логинимся под созданным курьером
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": login,
+            "password": password
+        }
+        print(data_login)
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        id_courier = response.json()['id']
+        assert response.status_code == 200 and response.text == f'{{"id":{id_courier}}}'
 
 
 
