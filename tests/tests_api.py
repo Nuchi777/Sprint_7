@@ -92,9 +92,9 @@ class TestCreateCourier:
 
 
 class TestLoginCourier:
-    def test_login_couriers(self):
+    def test_login_couriers(self, courier):
         # создаем курьера
-        data = register_new_courier_and_return_login_password()
+        data = courier
         login = data[0]
         password = data[1]
 
@@ -107,15 +107,12 @@ class TestLoginCourier:
         response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
         id_courier = response.json()['id']
         assert response.status_code == 200 and response.text == f'{{"id":{id_courier}}}'
+        print(data)
 
-        # удаляем созданного курьера
-        endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
-        response = requests.delete(f'{url}{endpoint_delete_courier}')
-        assert response.status_code == 200
 
-    def test_login_couriers_required_field_login_not_sending(self):
+    def test_login_couriers_required_field_login_not_sending(self, courier):
         # создаем курьера
-        data = register_new_courier_and_return_login_password()
+        data = courier
         password = data[1]
 
         # логинимся под созданным курьером без логина
@@ -126,16 +123,50 @@ class TestLoginCourier:
         response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
-        # логинимся под созданным курьером для удаления
-        endpoint_login_courier = '/api/v1/courier/login'
-        response = requests.post(f'{url}{endpoint_login_courier}', data=data_create)
-        id_courier = response.json()['id']
-        assert response.status_code == 200
 
-        # удаляем созданного курьера
-        endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
-        response = requests.delete(f'{url}{endpoint_delete_courier}')
-        assert response.status_code == 200
+    def test_login_couriers_required_field_password_not_sending(self, courier):
+        # создаем курьера
+        data = courier
+        login = data[0]
+
+        # логинимся под созданным курьером без пароля
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": login
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
