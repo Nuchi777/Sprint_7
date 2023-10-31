@@ -2,6 +2,7 @@ import json
 
 import pytest
 import requests
+import random
 
 from register_new_courier import register_new_courier_and_return_login_password
 
@@ -85,7 +86,7 @@ class TestCreateCourier:
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
             "login": login,
-            "password": 12345
+            "password": "12345"
         }
         response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
         assert response.status_code == 409 and response.text == '{"message": "Этот логин уже используется"}'
@@ -165,17 +166,53 @@ class TestLoginCourier:
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": login,
-            "password": 12345
+            "password": "12345"
         }
         response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
 
+    def test_login_couriers_required_field_login_not_sending(self, courier):
+        # если какого-то поля нет, запрос возвращает ошибку
+        # создаем курьера
+        data = courier
+        password = data[1]
 
+        # логинимся под созданным курьером без логина
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "password": password
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
+    def test_login_couriers_required_field_password_not_sending(self, courier):
+        # если какого-то поля нет, запрос возвращает ошибку
+        # создаем курьера
+        data = courier
+        login = data[0]
 
+        # логинимся под созданным курьером без логина
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": login
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
-
+    def test_login_couriers_non_existent_user(self, courier):
+        # если авторизоваться под несуществующим пользователем, запрос возвращает ошибку
+        data = courier
+        login = data[0]
+        password = data[0]
+        # логинимся под несуществующим курьером
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": f"{login}{random.randint(100, 999)}",
+            "password": f"{password}{random.randint(100, 999)}"
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
 
 
