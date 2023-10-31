@@ -138,9 +138,33 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
 
+    def test_login_couriers_field_login_incorrect(self, courier):
+        # создаем курьера
+        data = courier
+        password = data[1]
 
+        # логинимся под созданным курьером c неправильным логином
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": 'qwerty',
+            "password": password
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
+    def test_login_couriers_field_password_incorrect(self, courier):
+        # создаем курьера
+        data = courier
+        login = data[0]
 
+        # логинимся под созданным курьером c неправильным логином
+        endpoint_login_courier = '/api/v1/courier/login'
+        data_login = {
+            "login": login,
+            "password": 12345
+        }
+        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
+        assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
 
 
