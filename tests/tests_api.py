@@ -9,21 +9,18 @@ url = 'http://qa-scooter.praktikum-services.ru'
 
 class TestCreateCourier:
     @allure.title('Регистрация в приложении пройдет успешно, если валидными данными заполнены все поля')
-    def test_can_create_courier(self, courier_return_response):
-        response = courier_return_response
+    def test_can_create_courier(self, new_courier_return_response):
+        response = new_courier_return_response
         assert response.status_code == 201 and response.text == '{"ok":true}'
-
 
     @allure.title(
         'Регистрация в приложении пройдет неуспешно, если повторно создать пользователя с теми же параметрами')
-    def test_cannot_create_two_identical_couriers(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_cannot_create_two_identical_couriers(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
         password = data[1]
         firstName = data[2]
 
-        # создаем курьера с теми же параметрами
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
             "login": login,
@@ -36,7 +33,6 @@ class TestCreateCourier:
     @allure.title('Регистрация в приложении пройдет неуспешно, если поле login или password пустое')
     @pytest.mark.parametrize("login, password", [["", "12345"], ["e.koloskov", ""]])
     def test_create_couriers_fill_not_all_required_field(self, login, password):
-        # создаем курьера без логина или пароля
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
             "login": login,
@@ -48,18 +44,15 @@ class TestCreateCourier:
     @allure.title('Регистрация в приложении пройдет неуспешно, если поле login или password не передано')
     @pytest.mark.parametrize("data_create", [{"password": "12345"}, {"login": "e.koloskov"}])
     def test_create_couriers_required_field_login_or_password_not_sending(self, data_create):
-        # создаем курьера. Не передаем логин или пароль
         endpoint_create_courier = '/api/v1/courier'
         response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
         assert response.status_code == 400 and response.text == '{"message": "Недостаточно данных для создания учетной записи"}'
 
     @allure.title('Регистрация в приложении пройдет неуспешно, если поле login дублирует ранее созданную в БД запись')
-    def test_create_couriers_with_login_in_database(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_create_couriers_with_login_in_database(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
 
-        # создаем курьера с тем же логином
         endpoint_create_courier = '/api/v1/courier'
         data_create = {
             "login": login,
@@ -71,13 +64,11 @@ class TestCreateCourier:
 
 class TestLoginCourier:
     @allure.title('Авторизация в приложении пройдет успешно, если валидными данными заполнены все обязательные поля')
-    def test_login_couriers(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
         password = data[1]
 
-        # логинимся под созданным курьером
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": login,
@@ -88,12 +79,10 @@ class TestLoginCourier:
         assert response.status_code == 200 and response.text == f'{{"id":{id_courier}}}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле login пустое')
-    def test_login_couriers_required_field_login_empty(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_required_field_login_empty(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         password = data[1]
 
-        # логинимся под созданным курьером без логина
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": "",
@@ -103,12 +92,10 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле password пустое')
-    def test_login_couriers_required_field_password_empty(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_required_field_password_empty(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
 
-        # логинимся под созданным курьером без пароля
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": login,
@@ -118,12 +105,10 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле login заполнено не верно')
-    def test_login_couriers_field_login_incorrect(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_field_login_incorrect(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         password = data[1]
 
-        # логинимся под созданным курьером c неправильным логином
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": 'qwerty',
@@ -133,12 +118,10 @@ class TestLoginCourier:
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле password заполнено не верно')
-    def test_login_couriers_field_password_incorrect(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_field_password_incorrect(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
 
-        # логинимся под созданным курьером c неправильным паролем
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": login,
@@ -148,12 +131,10 @@ class TestLoginCourier:
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле login не передано')
-    def test_login_couriers_required_field_login_not_sending(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_required_field_login_not_sending(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         password = data[1]
 
-        # логинимся под созданным курьером без логина
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "password": password
@@ -162,12 +143,10 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле password не передано')
-    def test_login_couriers_required_field_password_not_sending(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_required_field_password_not_sending(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
 
-        # логинимся под созданным курьером без пароля
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": login
@@ -176,12 +155,11 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если авторизоваться под несуществующим пользователем')
-    def test_login_couriers_non_existent_user(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_non_existent_user(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
         password = data[1]
-        # логинимся под несуществующим курьером
+
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": f"{login}{random.randint(100, 999)}",
@@ -191,12 +169,11 @@ class TestLoginCourier:
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
     @allure.title('Успешный запрос возвращает id пользователя в теле ответа')
-    def test_login_couriers_return_id(self, courier_return_login_password):
-        # создаем курьера
-        data = courier_return_login_password
+    def test_login_couriers_return_id(self, new_courier_return_login_password):
+        data = new_courier_return_login_password
         login = data[0]
         password = data[1]
-        # логинимся под созданным курьером
+
         endpoint_login_courier = '/api/v1/courier/login'
         data_login = {
             "login": login,
@@ -211,7 +188,6 @@ class TestCreateOrder:
     @allure.title('При оформлении заказа можно указать один из цветов самоката')
     @pytest.mark.parametrize("color", ['BLACK', 'GREY', "BLACK, GREY", ''])
     def test_create_order_can_choose_scooter_colors_black_or_grey(self, color):
-        # создаем заказ
         endpoint_create_order = '/api/v1/orders'
         data_create_order = {
             "firstName": "Naruto",
