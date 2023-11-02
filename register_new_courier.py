@@ -36,5 +36,5 @@ def register_new_courier_and_return_login_password():
         login_pass.append(first_name)
 
     # возвращаем список
-    return login_pass
+    return login_pass, response
 

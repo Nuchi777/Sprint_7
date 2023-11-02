@@ -4,42 +4,21 @@ import pytest
 import requests
 import random
 
-
 url = 'http://qa-scooter.praktikum-services.ru'
 
 
 class TestCreateCourier:
     @allure.title('Регистрация в приложении пройдет успешно, если валидными данными заполнены все поля')
-    def test_can_create_courier(self):
-        # создаем курьера
-        endpoint_create_courier = '/api/v1/courier'
-        data_create = {
-            "login": "e.koloskov",
-            "password": "12345",
-            "firstName": "Evgeny"
-        }
-        response = requests.post(f'{url}{endpoint_create_courier}', data=data_create)
+    def test_can_create_courier(self, courier_return_response):
+        response = courier_return_response
         assert response.status_code == 201 and response.text == '{"ok":true}'
 
-        # логинимся под созданным курьером
-        endpoint_login_courier = '/api/v1/courier/login'
-        data_login = {
-            "login": "e.koloskov",
-            "password": "12345"
-        }
-        response = requests.post(f'{url}{endpoint_login_courier}', data=data_login)
-        id_courier = response.json()['id']
-        assert response.status_code == 200
 
-        # удаляем созданного курьера
-        endpoint_delete_courier = f'/api/v1/courier/{id_courier}'
-        response = requests.delete(f'{url}{endpoint_delete_courier}')
-        assert response.status_code == 200
-
-    @allure.title('Регистрация в приложении пройдет неуспешно, если повторно создать пользователя с теми же параметрами')
-    def test_cannot_create_two_identical_couriers(self, courier):
+    @allure.title(
+        'Регистрация в приложении пройдет неуспешно, если повторно создать пользователя с теми же параметрами')
+    def test_cannot_create_two_identical_couriers(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
         password = data[1]
         firstName = data[2]
@@ -75,9 +54,9 @@ class TestCreateCourier:
         assert response.status_code == 400 and response.text == '{"message": "Недостаточно данных для создания учетной записи"}'
 
     @allure.title('Регистрация в приложении пройдет неуспешно, если поле login дублирует ранее созданную в БД запись')
-    def test_create_couriers_with_login_in_database(self, courier):
+    def test_create_couriers_with_login_in_database(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
 
         # создаем курьера с тем же логином
@@ -92,9 +71,9 @@ class TestCreateCourier:
 
 class TestLoginCourier:
     @allure.title('Авторизация в приложении пройдет успешно, если валидными данными заполнены все обязательные поля')
-    def test_login_couriers(self, courier):
+    def test_login_couriers(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
         password = data[1]
 
@@ -109,9 +88,9 @@ class TestLoginCourier:
         assert response.status_code == 200 and response.text == f'{{"id":{id_courier}}}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле login пустое')
-    def test_login_couriers_required_field_login_empty(self, courier):
+    def test_login_couriers_required_field_login_empty(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         password = data[1]
 
         # логинимся под созданным курьером без логина
@@ -124,9 +103,9 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле password пустое')
-    def test_login_couriers_required_field_password_empty(self, courier):
+    def test_login_couriers_required_field_password_empty(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
 
         # логинимся под созданным курьером без пароля
@@ -139,9 +118,9 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле login заполнено не верно')
-    def test_login_couriers_field_login_incorrect(self, courier):
+    def test_login_couriers_field_login_incorrect(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         password = data[1]
 
         # логинимся под созданным курьером c неправильным логином
@@ -154,9 +133,9 @@ class TestLoginCourier:
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле password заполнено не верно')
-    def test_login_couriers_field_password_incorrect(self, courier):
+    def test_login_couriers_field_password_incorrect(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
 
         # логинимся под созданным курьером c неправильным паролем
@@ -169,9 +148,9 @@ class TestLoginCourier:
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле login не передано')
-    def test_login_couriers_required_field_login_not_sending(self, courier):
+    def test_login_couriers_required_field_login_not_sending(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         password = data[1]
 
         # логинимся под созданным курьером без логина
@@ -183,9 +162,9 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если обязательное поле password не передано')
-    def test_login_couriers_required_field_password_not_sending(self, courier):
+    def test_login_couriers_required_field_password_not_sending(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
 
         # логинимся под созданным курьером без пароля
@@ -197,9 +176,9 @@ class TestLoginCourier:
         assert response.status_code == 400 and response.text == '{"message":  "Недостаточно данных для входа"}'
 
     @allure.title('Авторизация в приложении пройдет неуспешно, если авторизоваться под несуществующим пользователем')
-    def test_login_couriers_non_existent_user(self, courier):
+    def test_login_couriers_non_existent_user(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
         password = data[1]
         # логинимся под несуществующим курьером
@@ -212,9 +191,9 @@ class TestLoginCourier:
         assert response.status_code == 404 and response.text == '{"message":  "Учетная запись не найдена"}'
 
     @allure.title('Успешный запрос возвращает id пользователя в теле ответа')
-    def test_login_couriers_return_id(self, courier):
+    def test_login_couriers_return_id(self, courier_return_login_password):
         # создаем курьера
-        data = courier
+        data = courier_return_login_password
         login = data[0]
         password = data[1]
         # логинимся под созданным курьером
@@ -249,7 +228,6 @@ class TestCreateOrder:
         response = requests.post(f'{url}{endpoint_create_order}', data=data_create_order_json)
         track_order = response.json()['track']
         assert response.status_code == 201 and response.text == f'{{"track":{track_order}}}'
-
 
 
 class TestListOrders:
