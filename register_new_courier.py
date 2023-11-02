@@ -15,8 +15,6 @@ def generate_random_string(length):
 
 
 def register_new_courier_and_return_login_password():
-    # метод генерирует строку, состоящую только из букв нижнего регистра, в качестве параметра передаём длину строки
-
     # создаём список, чтобы метод мог его вернуть
     login_pass = []
 
