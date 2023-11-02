@@ -2,14 +2,20 @@ import requests
 import random
 import string
 
+
 # метод регистрации нового курьера возвращает список из логина и пароля
 # если регистрация не удалась, возвращает пустой список
+
+
+def generate_random_string(length):
+    # метод генерирует строку, состоящую только из букв нижнего регистра, в качестве параметра передаём длину строки
+    letters = string.ascii_lowercase
+    random_string = ''.join(random.choice(letters) for i in range(length))
+    return random_string
+
+
 def register_new_courier_and_return_login_password():
     # метод генерирует строку, состоящую только из букв нижнего регистра, в качестве параметра передаём длину строки
-    def generate_random_string(length):
-        letters = string.ascii_lowercase
-        random_string = ''.join(random.choice(letters) for i in range(length))
-        return random_string
 
     # создаём список, чтобы метод мог его вернуть
     login_pass = []
@@ -37,4 +43,3 @@ def register_new_courier_and_return_login_password():
 
     # возвращаем список
     return login_pass, response
-
