@@ -11,7 +11,6 @@ class TestLoginCourier:
         data = new_courier_return_login_password
         login = data[0]
         password = data[1]
-
         data_login = {
             "login": login,
             "password": password
@@ -24,7 +23,6 @@ class TestLoginCourier:
     def test_login_couriers_required_field_login_empty(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         password = data[1]
-
         data_login = {
             "login": "",
             "password": password
@@ -36,7 +34,6 @@ class TestLoginCourier:
     def test_login_couriers_required_field_password_empty(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         login = data[0]
-
         data_login = {
             "login": login,
             "password": ""
@@ -48,7 +45,6 @@ class TestLoginCourier:
     def test_login_couriers_field_login_incorrect(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         password = data[1]
-
         data_login = {
             "login": 'qwerty',
             "password": password
@@ -60,7 +56,6 @@ class TestLoginCourier:
     def test_login_couriers_field_password_incorrect(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         login = data[0]
-
         data_login = {
             "login": login,
             "password": "12345"
@@ -72,7 +67,6 @@ class TestLoginCourier:
     def test_login_couriers_required_field_login_not_sending(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         password = data[1]
-
         data_login = {
             "password": password
         }
@@ -83,7 +77,6 @@ class TestLoginCourier:
     def test_login_couriers_required_field_password_not_sending(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         login = data[0]
-
         data_login = {
             "login": login
         }
@@ -95,7 +88,6 @@ class TestLoginCourier:
         data = new_courier_return_login_password
         login = data[0]
         password = data[1]
-
         data_login = {
             "login": f"{login}{random.randint(100, 999)}",
             "password": f"{password}{random.randint(100, 999)}"
@@ -108,7 +100,6 @@ class TestLoginCourier:
         data = new_courier_return_login_password
         login = data[0]
         password = data[1]
-
         data_login = {
             "login": login,
             "password": password

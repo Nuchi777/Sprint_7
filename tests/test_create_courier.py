@@ -18,7 +18,6 @@ class TestCreateCourier:
         login = data[0]
         password = data[1]
         firstName = data[2]
-
         data_create = {
             "login": login,
             "password": password,
@@ -47,7 +46,6 @@ class TestCreateCourier:
     def test_create_couriers_with_login_in_database(self, new_courier_return_login_password):
         data = new_courier_return_login_password
         login = data[0]
-
         data_create = {
             "login": login,
             "password": "12345"
